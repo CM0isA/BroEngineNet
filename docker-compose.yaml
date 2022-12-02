@@ -1,0 +1,7 @@
+services:
+  engine:
+    image: engine:latest
+    volumes:
+      - type: bind
+        source: /home/constantin/projects/BroEngineNet
+        target: /app
