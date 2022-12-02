@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="glfw" Version="3.3.8" />
     <PackageReference Include="OpenTK" Version="4.7.5" />
   </ItemGroup>
 
