@@ -47,29 +47,14 @@ namespace broEngine
             Vao = new VAO();
             Vbo = new VBO();
 
-            //Vbo.UploadData(vertices);
 
-            //Vao.BindVAO();
-            //Vao.LinkVBO(Vbo, 0, 1, 3 * sizeof(float), 0);
+            Vbo.UploadData(vertices);
 
-            //Vao.UnbindVAO();
+            Vao.BindVAO();
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Vbo.ID);
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            Vao.LinkVBO(Vbo, 0, 3, VertexAttribPointerType.Float, 3, 0); 
 
-            GL.BindVertexArray(Vao.ID);
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Vbo.ID);
-            GL.VertexAttribPointer(0,3, VertexAttribPointerType.Float, false, 3* sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
-
-            GL.BindVertexArray(0);
-
-
-
-
-
+            Vao.UnbindVAO();
 
         }
 
@@ -86,7 +71,7 @@ namespace broEngine
 
             GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
 
-            //Vao.UnbindVAO();
+            Vao.UnbindVAO();
 
             SwapBuffers();
         }
