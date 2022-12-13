@@ -1,10 +1,11 @@
 ﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace BroEngine.Graphics.Shaders
 {
     public class Shader
     {
-        int shaderProgramID;
+        public int shaderProgramID;
         private bool disposedValue = false;
 
         public Shader(string vertexSource, string fragmentSource)
@@ -88,6 +89,12 @@ namespace BroEngine.Graphics.Shaders
                 "\\src\\Graphics\\Shaders\\" + filename;
 
             return System.IO.File.ReadAllText(_, System.Text.Encoding.UTF8);
+        }
+
+        public void SetMatrix4(string location, Matrix4 matrix)
+        {
+            int uniformLocation = GL.GetUniformLocation(shaderProgramID, location);
+            GL.UniformMatrix4(uniformLocation, false, ref matrix);
         }
     }
 }

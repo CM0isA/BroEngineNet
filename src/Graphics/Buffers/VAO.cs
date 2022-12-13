@@ -18,7 +18,7 @@ namespace BroEngine.Graphics.Buffers
         public void LinkVBO(VBO vBO, int layout, int numberOfComponents, VertexAttribPointerType type, int stride, int offset)
         {
             vBO.BindBuffer();
-            GL.VertexAttribPointer(layout, numberOfComponents, type, false, stride * sizeof(float), offset);
+            GL.VertexAttribPointer(layout, numberOfComponents, type, false, stride , offset);
             GL.EnableVertexAttribArray(layout);
             vBO.UnbindBuffer();
         }

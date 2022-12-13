@@ -4,27 +4,43 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Drawing;
 using OpenTK.Mathematics;
+using BroEngine.Graphics.Camera;
 
 namespace broEngine
 {
     public class Engine : GameWindow
     {
-        private VBO Vbo { get; set; }
-        private VAO Vao { get; set; }
+        private VBO vbo { get; set; }
+        private VAO vao { get; set; }
+        private EBO ebo { get; set; }
 
         public float[] vertices { get; set; }
+        public uint[] indices { get; set; }
+        public Matrix4 ModelMatrix { get; set; }
+        public Matrix4 ModelView { get; set; }
+        public Matrix4 ModelProjection { get; set; }
+        public Camera camera { get; set; } = new Camera();
+
 
         Shader shader { get; set; }
 
-        public Engine(string title) : base(GameWindowSettings.Default, new NativeWindowSettings())
+        public Engine(string title, int width = 1980, int height = 1080) :
+            base(GameWindowSettings.Default,
+                new NativeWindowSettings()
+                {
+                    Title = title,
+                    Size = new Vector2i(width, height),
+                    WindowBorder = WindowBorder.Fixed,
+                    StartVisible = false,
+                    StartFocused = true,
+                    API = ContextAPI.OpenGL,
+                    Profile = ContextProfile.Core,
+                    APIVersion = new Version(4, 6)
+                })
         {
-            Title = title;
-            this.CenterWindow(new Vector2i(1980, 1080));
+            this.CenterWindow(new Vector2i(width, height));
         }
-
-
 
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
@@ -32,30 +48,41 @@ namespace broEngine
 
             KeyboardState keyboardState = KeyboardState.GetSnapshot();
 
-            if (keyboardState.IsKeyDown(Keys.H))
+            if (IsFocused)
             {
+                camera.CameraMovement(keyboardState);
             }
         }
 
         protected override void OnLoad()
         {
+            this.IsVisible = true;
             base.OnLoad();
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
             shader = new Shader("VertexShader.glsl", "FragmentShader.glsl");
 
-            Vao = new VAO();
-            Vbo = new VBO();
+            vao = new VAO();
+            vbo = new VBO();
+            ebo = new EBO();
 
+            ebo.UploadData(indices);
 
-            Vbo.UploadData(vertices);
+            vbo.UploadData(vertices);
 
-            Vao.BindVAO();
+            vao.BindVAO();
 
-            Vao.LinkVBO(Vbo, 0, 3, VertexAttribPointerType.Float, 3, 0); 
+            vao.LinkVBO(vbo, 0, 3, VertexAttribPointerType.Float, 7 * sizeof(float), 0);
+            vao.LinkVBO(vbo, 1, 4, VertexAttribPointerType.Float, 7 * sizeof(float), 3 * sizeof(float));
 
-            Vao.UnbindVAO();
+            vao.UnbindVAO();
 
+            shader.Use();
+
+            ModelProjection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), (float)1980 / (float)1080, 0.1f, 100.0f);
+            ModelMatrix = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(-55.0f));
+
+            camera = new Camera();
         }
 
 
@@ -63,17 +90,22 @@ namespace broEngine
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            base.OnRenderFrame(args);
+            ModelView = camera.GetViewMatrix();
 
             shader.Use();
+            shader.SetMatrix4("model", ModelView);
+            shader.SetMatrix4("view", ModelView);
+            shader.SetMatrix4("projection", ModelProjection);
 
-            Vao.BindVAO();
+            vao.BindVAO();
+            ebo.BindBuffer();
 
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
 
-            Vao.UnbindVAO();
+            vao.UnbindVAO();
 
             SwapBuffers();
+            base.OnRenderFrame(args);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -86,6 +118,9 @@ namespace broEngine
         {
             base.OnUnload();
             shader.Dispose();
+            vbo.Delete();
+            ebo.Delete();
+            vao.Delete();
         }
 
     }

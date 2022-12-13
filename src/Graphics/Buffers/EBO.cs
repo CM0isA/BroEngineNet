@@ -2,31 +2,29 @@
 
 namespace BroEngine.Graphics.Buffers
 {
-    public class VBO
+    public class EBO
     {
         public int ID;
-        public VBO()
+        public EBO()
         {
             ID = GL.GenBuffer();
         }
 
-        public void UploadData(float[] vertices)
+        public void UploadData(uint[] indices)
         {
             BindBuffer();
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
-            UnbindBuffer();
+            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
         }
 
         public void BindBuffer()
         {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, ID);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ID);
         }
 
         public void UnbindBuffer()
         {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
         }
-
         public void Delete()
         {
             GL.DeleteBuffer(ID);
