@@ -17,10 +17,11 @@ namespace broEngine
 
         public float[] vertices { get; set; }
         public uint[] indices { get; set; }
-        public Matrix4 ModelMatrix { get; set; }
-        public Matrix4 ModelView { get; set; }
-        public Matrix4 ModelProjection { get; set; }
+        public Matrix4 ModelMatrix { get; set; } = Matrix4.Identity;
+        public Matrix4 ViewMatrix { get; set; } = Matrix4.Identity;
+        public Matrix4 ProjectionMatrix { get; set; } = Matrix4.Identity;
         public Camera camera { get; set; } = new Camera();
+        public float deltaTime { get; set; }
 
 
         Shader shader { get; set; }
@@ -45,12 +46,14 @@ namespace broEngine
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             base.OnUpdateFrame(args);
+            deltaTime = (float)args.Time;
 
             KeyboardState keyboardState = KeyboardState.GetSnapshot();
 
             if (IsFocused)
             {
-                camera.CameraMovement(keyboardState);
+                float cameraSpeedNormalized = camera.CameraSpeed * deltaTime;
+                camera.CameraMovement(keyboardState, speed: cameraSpeedNormalized);
             }
         }
 
@@ -79,7 +82,7 @@ namespace broEngine
 
             shader.Use();
 
-            ModelProjection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), (float)1980 / (float)1080, 0.1f, 100.0f);
+            ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), (float)1980 / (float)1080, 0.1f, 100.0f);
             ModelMatrix = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(-55.0f));
 
             camera = new Camera();
@@ -90,12 +93,12 @@ namespace broEngine
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            ModelView = camera.GetViewMatrix();
+            ViewMatrix = camera.GetViewMatrix();
 
             shader.Use();
-            shader.SetMatrix4("model", ModelView);
-            shader.SetMatrix4("view", ModelView);
-            shader.SetMatrix4("projection", ModelProjection);
+            shader.SetMatrix4("model", ViewMatrix);
+            shader.SetMatrix4("view", ViewMatrix);
+            shader.SetMatrix4("projection", ProjectionMatrix);
 
             vao.BindVAO();
             ebo.BindBuffer();

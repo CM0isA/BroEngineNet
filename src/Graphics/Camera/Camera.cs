@@ -10,7 +10,8 @@ namespace BroEngine.Graphics.Camera
         public Vector3 CameraDirection { get; set; } = new Vector3(0.0f, 0.0f, -1.0f);
         public Vector3 CameraRight { get; set; }
         public Vector3 CameraUp { get; set; } = new Vector3(0.0f, 1.0f, 0.0f);
-        public Matrix4 ViewMatrix { get; set; }
+        public Matrix4 ViewMatrix { get; set; } = Matrix4.Identity;
+        public float CameraSpeed { get; set; } = 1.0f;
         public Camera() {
             CameraRight = Vector3.Cross(CameraDirection, CameraUp);
 
@@ -61,37 +62,36 @@ namespace BroEngine.Graphics.Camera
             
         }
 
-        public void CameraMovement(KeyboardState state)
+        public void CameraMovement(KeyboardState state, float speed)
         {
             if(state.IsKeyDown(Keys.W))
             {
-                MoveForward(0.5f);
-                Console.WriteLine(CameraPosition);
+                MoveForward(speed);
             }
 
             if (state.IsKeyDown(Keys.S))
             {
-                MoveBackwards(0.5f);
+                MoveBackwards(speed);
             }
 
             if (state.IsKeyDown(Keys.A))
             {
-                MoveLeft(0.5f);
+                MoveLeft(speed);
             }
 
             if (state.IsKeyDown(Keys.D))
             {
-                MoveRight(0.5f);
+                MoveRight(speed);
             }
 
             if (state.IsKeyDown(Keys.Q))
             {
-                MoveDown(0.5f);
+                MoveDown(speed);
             }
 
             if (state.IsKeyDown(Keys.E))
             {
-                MoveUp(0.5f);
+                MoveUp(speed);
             }
 
         }
