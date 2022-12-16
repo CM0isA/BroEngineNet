@@ -7,15 +7,39 @@ namespace BroEngine.Graphics.Camera
     public class Camera
     {
         public Vector3 CameraPosition { get; set; } = new Vector3(0.0f, 0.0f, 3.0f);
-        public Vector3 CameraDirection { get; set; } = new Vector3(0.0f, 0.0f, -1.0f);
-        public Vector3 CameraRight { get; set; }
-        public Vector3 CameraUp { get; set; } = new Vector3(0.0f, 1.0f, 0.0f);
+        private Vector3 CameraDirection { get; set; } = -Vector3.UnitZ;
+        private Vector3 CameraRight { get; set; } = Vector3.UnitX;
+        private Vector3 CameraUp { get; set; } = Vector3.UnitY;
+        // Rotation around the X axis (radians)
+        private float _pitch { get; set; }
+        // Rotation around the Y axis (radians)
+        private float _yaw { get; set; } = -MathHelper.PiOver2;
+        public Camera() {
+        }
+
+        public float Pitch
+        {
+            get => MathHelper.RadiansToDegrees(_pitch);
+            set
+            {
+                var angle = MathHelper.Clamp(value, -89f, 89f);
+                _pitch = MathHelper.DegreesToRadians(angle);
+            }
+        }
+
+        public float Yaw
+        {
+            get => MathHelper.RadiansToDegrees(_yaw);
+            set
+            {
+                _yaw = MathHelper.DegreesToRadians(value);
+            }
+        }
+
         public Matrix4 ViewMatrix { get; set; } = Matrix4.Identity;
         public float CameraSpeed { get; set; } = 1.0f;
-        public Camera() {
-            CameraRight = Vector3.Cross(CameraDirection, CameraUp);
+        public float Sensitivity { get; set;} = 0.01f;
 
-        }
 
         public Matrix4 GetViewMatrix() {
             return Matrix4.LookAt(CameraPosition, CameraPosition + CameraDirection, CameraUp);
@@ -57,9 +81,29 @@ namespace BroEngine.Graphics.Camera
             CameraPosition -= direction * distance;
         }
 
-        private void RotateOX(float angle)
+        public void RotateCamera(float deltaX, float deltaY, float deltaTime)
         {
-            
+            _yaw += deltaX * Sensitivity * deltaTime;
+            _pitch -= deltaY * Sensitivity * deltaTime;
+            Console.WriteLine("direction " + CameraDirection);
+
+            if (_pitch > 89.0f)
+            {
+                _pitch = 89.0f;
+            }
+            else if (_pitch < -89.0f)
+            {
+                _pitch = -89.0f;
+            }
+            Vector3 newDirection;
+
+            newDirection.Y = (float)Math.Sin(Pitch);
+            newDirection.X = (float)Math.Cos(Pitch) * (float)Math.Cos(Yaw);
+            newDirection.Z = (float)Math.Cos(Pitch) * (float)Math.Sin(Yaw);
+            CameraDirection = Vector3.Normalize(newDirection);
+
+            CameraRight = Vector3.Normalize(Vector3.Cross(CameraDirection, Vector3.UnitY));
+            CameraUp = Vector3.Normalize(Vector3.Cross(CameraRight, CameraDirection));
         }
 
         public void CameraMovement(KeyboardState state, float speed)

@@ -22,9 +22,10 @@ namespace broEngine
         public Matrix4 ProjectionMatrix { get; set; } = Matrix4.Identity;
         public Camera camera { get; set; } = new Camera();
         public float deltaTime { get; set; }
+        private Vector2 LastMousePosition { get; set; } = Vector2.Zero;
+        private bool MouseFirstMove { get; set; } = true;
 
-
-        Shader shader { get; set; }
+        private Shader shader { get; set; }
 
         public Engine(string title, int width = 1980, int height = 1080) :
             base(GameWindowSettings.Default,
@@ -49,12 +50,38 @@ namespace broEngine
             deltaTime = (float)args.Time;
 
             KeyboardState keyboardState = KeyboardState.GetSnapshot();
-
             if (IsFocused)
             {
                 float cameraSpeedNormalized = camera.CameraSpeed * deltaTime;
                 camera.CameraMovement(keyboardState, speed: cameraSpeedNormalized);
             }
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            float deltaX =  e.DeltaX;
+            float deltaY = e.DeltaY;
+
+            if(MouseFirstMove)
+            {
+                deltaX = 0; deltaY = 0;
+                MouseFirstMove = false;
+            }
+
+            camera.RotateCamera(deltaX, deltaY, deltaTime);
+            base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseEnter()
+        {
+            base.OnMouseEnter();
+            LastMousePosition = new Vector2(MousePosition.X, MousePosition.Y);
+            MouseFirstMove = true;
         }
 
         protected override void OnLoad()
@@ -94,9 +121,10 @@ namespace broEngine
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             ViewMatrix = camera.GetViewMatrix();
+            ModelMatrix *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(deltaTime * 5f));
 
             shader.Use();
-            shader.SetMatrix4("model", ViewMatrix);
+            shader.SetMatrix4("model", ModelMatrix);
             shader.SetMatrix4("view", ViewMatrix);
             shader.SetMatrix4("projection", ProjectionMatrix);
 
