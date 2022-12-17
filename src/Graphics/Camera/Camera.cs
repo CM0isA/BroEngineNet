@@ -14,6 +14,8 @@ namespace BroEngine.Graphics.Camera
         private float _pitch { get; set; }
         // Rotation around the Y axis (radians)
         private float _yaw { get; set; } = -MathHelper.PiOver2;
+        public float FieldOfView { get; set; } = 45f;
+        public float AspectRatio { get; set; } = 1980 / 1080;
         public Camera() {
         }
 
@@ -38,13 +40,19 @@ namespace BroEngine.Graphics.Camera
 
         public Matrix4 ViewMatrix { get; set; } = Matrix4.Identity;
         public float CameraSpeed { get; set; } = 1.0f;
-        public float Sensitivity { get; set;} = 0.01f;
-
+        public Vector2 Sensitivity { get; set; } = new Vector2(0.01f, 0.01f);
 
         public Matrix4 GetViewMatrix() {
             return Matrix4.LookAt(CameraPosition, CameraPosition + CameraDirection, CameraUp);
         }
 
+        public Matrix4 GetProjectionMatrix()
+        {
+            return Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FieldOfView), AspectRatio, 0.1f, 100.0f);
+        }
+
+
+        // Camera Movement
         private void MoveForward(float distance)
         {
             Vector3 direction = Vector3.Normalize(CameraDirection);
@@ -83,9 +91,8 @@ namespace BroEngine.Graphics.Camera
 
         public void RotateCamera(float deltaX, float deltaY, float deltaTime)
         {
-            _yaw += deltaX * Sensitivity * deltaTime;
-            _pitch -= deltaY * Sensitivity * deltaTime;
-            Console.WriteLine("direction " + CameraDirection);
+            _yaw += deltaX * Sensitivity.X * deltaTime;
+            _pitch -= deltaY * Sensitivity.Y * deltaTime;
 
             if (_pitch > 89.0f)
             {

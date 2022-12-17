@@ -1,16 +1,17 @@
-using BroEngine.Graphics.Shaders;
 using BroEngine.Graphics.Buffers;
+using BroEngine.Graphics.Camera;
+using BroEngine.Graphics.Shaders;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using OpenTK.Mathematics;
-using BroEngine.Graphics.Camera;
 
 namespace broEngine
 {
     public class Engine : GameWindow
     {
+        #region variables
         private VBO vbo { get; set; }
         private VAO vao { get; set; }
         private EBO ebo { get; set; }
@@ -23,9 +24,10 @@ namespace broEngine
         public Camera camera { get; set; } = new Camera();
         public float deltaTime { get; set; }
         private Vector2 LastMousePosition { get; set; } = Vector2.Zero;
-        private bool MouseFirstMove { get; set; } = true;
+        private bool CameraTrigger { get; set; } = false;
 
         private Shader shader { get; set; }
+        #endregion
 
         public Engine(string title, int width = 1980, int height = 1080) :
             base(GameWindowSettings.Default,
@@ -60,20 +62,32 @@ namespace broEngine
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);
+
+            if (e.Button == MouseButton.Right)
+            {
+                CameraTrigger = true;
+            }
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (e.Button == MouseButton.Right)
+            {
+                CameraTrigger = false;
+            }
         }
 
         protected override void OnMouseMove(MouseMoveEventArgs e)
         {
-            float deltaX =  e.DeltaX;
+            float deltaX = e.DeltaX;
             float deltaY = e.DeltaY;
 
-            if(MouseFirstMove)
+            if (CameraTrigger)
             {
-                deltaX = 0; deltaY = 0;
-                MouseFirstMove = false;
+                camera.RotateCamera(deltaX, deltaY, deltaTime);
             }
 
-            camera.RotateCamera(deltaX, deltaY, deltaTime);
             base.OnMouseMove(e);
         }
 
@@ -81,7 +95,6 @@ namespace broEngine
         {
             base.OnMouseEnter();
             LastMousePosition = new Vector2(MousePosition.X, MousePosition.Y);
-            MouseFirstMove = true;
         }
 
         protected override void OnLoad()
@@ -109,10 +122,13 @@ namespace broEngine
 
             shader.Use();
 
-            ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), (float)1980 / (float)1080, 0.1f, 100.0f);
-            ModelMatrix = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(-55.0f));
-
             camera = new Camera();
+            ProjectionMatrix = camera.GetProjectionMatrix();
+
+            ModelMatrix = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(-55.0f));
+            var scale = Matrix4.CreateScale(5);
+            ModelMatrix *= scale;
+
         }
 
 
