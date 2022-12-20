@@ -1,15 +1,16 @@
-﻿using BroEngine.Graphics.Shaders;
-using OpenTK.Windowing.GraphicsLibraryFramework;
+﻿using BroEngine.Graphics.Model;
+using OpenTK.Mathematics;
 
 class Program
 {
     private static void Main(string[] args)
     {
-        float[] vertices = {
-            0.5f,  0.5f, 0.0f, 1f, 0f, 0f, 1f, // top right
-            0.5f, -0.5f, 0.0f, 1.0f, 0f, 0f, 1f, // bottom right
-            -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0f, 0f,  // bottom left
-            -0.5f,  0.5f, 0.0f, 0f, 0f, 1.0f, 1f   // top left
+        Vertex[] vertices =
+        {
+            new Vertex(new Vector3(0.5f,  0.5f, 0.0f), new Vector4(1f, 0f, 0f, 1f), new Vector3(0.5f,  0.5f, 0.0f)),
+            new Vertex(new Vector3(0.5f, -0.5f, 0.0f), new Vector4(1f, 0f, 0f, 1f), new Vector3(0.5f,  0.5f, 0.0f)),
+            new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Vector4(0f, 1f, 0f, 1f), new Vector3(0.5f,  0.5f, 0.0f)),
+            new Vertex(new Vector3(-0.5f,  0.5f, 0.0f), new Vector4(0f, 0f, 1f, 1f), new Vector3(0.5f,  0.5f, 0.0f))
         };
 
         uint[] indices = {
@@ -18,7 +19,7 @@ class Program
             };
 
         using (broEngine.Engine engine = new broEngine.Engine("BroEngine", 1980, 1080))
-        { 
+        {
             engine.vertices = vertices;
             engine.indices = indices;
             engine.Run();

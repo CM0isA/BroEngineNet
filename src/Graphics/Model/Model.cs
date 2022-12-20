@@ -1,25 +1,13 @@
 ﻿using BroEngine.Graphics.Buffers;
+using BroEngine.Graphics.Model;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace BroEngine.Graphics
 {
-    public readonly struct Vertex
+    public class Model2
     {
-        public readonly Vector3 positions;
-        public readonly Vector3 normals;
-        public readonly Vector2 textureCoord;
-        public readonly Vector3 colors;
-
-        public Vertex()
-        {
-
-        }
-    }
-
-    public class Model
-    {
-        public float[] m_vertices { get; set; }
+        public Vertex[] m_vertices { get; set; }
         public uint[] m_indices { get; set; }
         private int num_Vertices { get; set; } = 0;
         private int num_Indices { get; set; } = 0;
@@ -30,7 +18,7 @@ namespace BroEngine.Graphics
         private EBO meshEBO;
         private VBO meshVBO;
 
-        public Model(float[] vertices, uint[] indices)
+        public Model2(Vertex[] vertices, uint[] indices)
         {
             m_vertices = vertices;
             m_indices = indices;

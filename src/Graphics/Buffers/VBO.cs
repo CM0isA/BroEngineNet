@@ -1,8 +1,9 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using BroEngine.Graphics.Model;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BroEngine.Graphics.Buffers
 {
-    public class VBO
+    public class VBO : IDisposable
     {
         public int ID;
         public VBO()
@@ -10,10 +11,20 @@ namespace BroEngine.Graphics.Buffers
             ID = GL.GenBuffer();
         }
 
-        public void UploadData(float[] vertices)
+        ~VBO()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            GL.DeleteBuffer(ID);
+        }
+
+        public void UploadData(Vertex[] vertices)
         {
             BindBuffer();
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * Vertex.VertexInfo.SizeInBytes, vertices, BufferUsageHint.StaticDraw);
             UnbindBuffer();
         }
 
@@ -25,11 +36,6 @@ namespace BroEngine.Graphics.Buffers
         public void UnbindBuffer()
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        }
-
-        public void Delete()
-        {
-            GL.DeleteBuffer(ID);
         }
     }
 }

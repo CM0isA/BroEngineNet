@@ -40,7 +40,7 @@ namespace BroEngine.Graphics.Camera
 
         public Matrix4 ViewMatrix { get; set; } = Matrix4.Identity;
         public float CameraSpeed { get; set; } = 1.0f;
-        public Vector2 Sensitivity { get; set; } = new Vector2(0.01f, 0.01f);
+        public Vector2 Sensitivity { get; set; } = new Vector2(0.001f, 0.001f);
 
         public Matrix4 GetViewMatrix() {
             return Matrix4.LookAt(CameraPosition, CameraPosition + CameraDirection, CameraUp);

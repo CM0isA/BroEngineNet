@@ -1,5 +1,6 @@
 using BroEngine.Graphics.Buffers;
 using BroEngine.Graphics.Camera;
+using BroEngine.Graphics.Model;
 using BroEngine.Graphics.Shaders;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -16,15 +17,16 @@ namespace broEngine
         private VAO vao { get; set; }
         private EBO ebo { get; set; }
 
-        public float[] vertices { get; set; }
+        public Vertex[] vertices { get; set; }
         public uint[] indices { get; set; }
         public Matrix4 ModelMatrix { get; set; } = Matrix4.Identity;
         public Matrix4 ViewMatrix { get; set; } = Matrix4.Identity;
         public Matrix4 ProjectionMatrix { get; set; } = Matrix4.Identity;
         public Camera camera { get; set; } = new Camera();
-        public float deltaTime { get; set; }
+        public float DeltaTime { get; set; }
         private Vector2 LastMousePosition { get; set; } = Vector2.Zero;
         private bool CameraTrigger { get; set; } = false;
+        private bool MouseFirstMove { get; set; } = true;
 
         private Shader shader { get; set; }
         #endregion
@@ -49,12 +51,12 @@ namespace broEngine
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             base.OnUpdateFrame(args);
-            deltaTime = (float)args.Time;
+            DeltaTime = (float)args.Time;
 
             KeyboardState keyboardState = KeyboardState.GetSnapshot();
             if (IsFocused)
             {
-                float cameraSpeedNormalized = camera.CameraSpeed * deltaTime;
+                float cameraSpeedNormalized = camera.CameraSpeed * DeltaTime;
                 camera.CameraMovement(keyboardState, speed: cameraSpeedNormalized);
             }
         }
@@ -83,9 +85,16 @@ namespace broEngine
             float deltaX = e.DeltaX;
             float deltaY = e.DeltaY;
 
+
+            if (MouseFirstMove)
+            {
+                deltaX = 0; deltaY = 0;
+                MouseFirstMove = false;
+            }
+
             if (CameraTrigger)
             {
-                camera.RotateCamera(deltaX, deltaY, deltaTime);
+                camera.RotateCamera(deltaX, deltaY, DeltaTime);
             }
 
             base.OnMouseMove(e);
@@ -95,6 +104,7 @@ namespace broEngine
         {
             base.OnMouseEnter();
             LastMousePosition = new Vector2(MousePosition.X, MousePosition.Y);
+            MouseFirstMove = true;
         }
 
         protected override void OnLoad()
@@ -113,10 +123,26 @@ namespace broEngine
 
             vbo.UploadData(vertices);
 
+            int vertexSizeInBytes = Vertex.VertexInfo.SizeInBytes;
+
             vao.BindVAO();
 
-            vao.LinkVBO(vbo, 0, 3, VertexAttribPointerType.Float, 7 * sizeof(float), 0);
-            vao.LinkVBO(vbo, 1, 4, VertexAttribPointerType.Float, 7 * sizeof(float), 3 * sizeof(float));
+            VertexAttribute attrib0 = Vertex.VertexInfo.VertexAttributes[0];
+            VertexAttribute attrib1 = Vertex.VertexInfo.VertexAttributes[1];
+            VertexAttribute attrib2 = Vertex.VertexInfo.VertexAttributes[2];
+
+
+
+
+            vao.LinkVBO(vbo, attrib0.Index, attrib0.ComponentCount, VertexAttribPointerType.Float, vertexSizeInBytes, attrib0.Offset);
+            vao.LinkVBO(vbo, attrib1.Index, attrib1.ComponentCount, VertexAttribPointerType.Float, vertexSizeInBytes, attrib1.Offset);
+            vao.LinkVBO(vbo, attrib2.Index, attrib2.ComponentCount, VertexAttribPointerType.Float, vertexSizeInBytes, attrib2.Offset);
+
+
+
+            //vao.LinkVBO(vbo, 1, 4, VertexAttribPointerType.Float, vertices.Length * Vertex.VertexInfo.SizeInBytes, 3 * sizeof(float));
+            //vao.LinkVBO(vbo, 2, 3, VertexAttribPointerType.Float, vertices.Length * Vertex.VertexInfo.SizeInBytes, 7 * sizeof(float));
+
 
             vao.UnbindVAO();
 
@@ -137,7 +163,7 @@ namespace broEngine
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             ViewMatrix = camera.GetViewMatrix();
-            ModelMatrix *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(deltaTime * 5f));
+            ModelMatrix *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(DeltaTime * 5f));
 
             shader.Use();
             shader.SetMatrix4("model", ModelMatrix);
@@ -165,7 +191,6 @@ namespace broEngine
         {
             base.OnUnload();
             shader.Dispose();
-            vbo.Delete();
             ebo.Delete();
             vao.Delete();
         }
