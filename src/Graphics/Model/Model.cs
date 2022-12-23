@@ -27,7 +27,7 @@ namespace BroEngine.Graphics
             num_Indices = indices.Length;
             num_Vertices = vertices.Length;
             meshVAO = new VAO();
-            meshVBO = new VBO();
+            //meshVBO = new VBO(BufferUsageHint.StaticDraw);
             meshEBO = new EBO();
         }
 

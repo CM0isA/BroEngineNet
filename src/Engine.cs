@@ -116,12 +116,14 @@ namespace broEngine
             shader = new Shader("VertexShader.glsl", "FragmentShader.glsl");
 
             vao = new VAO();
-            vbo = new VBO();
+            vbo = new VBO(Vertex.VertexInfo, vertexCount: vertices.Length, BufferUsageHint.StaticDraw);
             ebo = new EBO();
 
             ebo.UploadData(indices);
 
-            vbo.UploadData(vertices);
+            //vbo.UploadData(vertices);
+
+            vbo.SetData(vertices, vertices.Length);
 
             int vertexSizeInBytes = Vertex.VertexInfo.SizeInBytes;
 
@@ -131,17 +133,10 @@ namespace broEngine
             VertexAttribute attrib1 = Vertex.VertexInfo.VertexAttributes[1];
             VertexAttribute attrib2 = Vertex.VertexInfo.VertexAttributes[2];
 
+            vao.LinkVBO(vbo, layout: attrib0.Index, numberOfComponents: attrib0.ComponentCount, type: VertexAttribPointerType.Float, stride: vertexSizeInBytes, offset: attrib0.Offset);
+            vao.LinkVBO(vbo, layout: attrib1.Index, numberOfComponents: attrib1.ComponentCount, type: VertexAttribPointerType.Float, stride: vertexSizeInBytes, offset: attrib1.Offset);
+            vao.LinkVBO(vbo, layout: attrib2.Index, numberOfComponents: attrib2.ComponentCount, type: VertexAttribPointerType.Float, stride: vertexSizeInBytes, offset: attrib2.Offset);
 
-
-
-            vao.LinkVBO(vbo, attrib0.Index, attrib0.ComponentCount, VertexAttribPointerType.Float, vertexSizeInBytes, attrib0.Offset);
-            vao.LinkVBO(vbo, attrib1.Index, attrib1.ComponentCount, VertexAttribPointerType.Float, vertexSizeInBytes, attrib1.Offset);
-            vao.LinkVBO(vbo, attrib2.Index, attrib2.ComponentCount, VertexAttribPointerType.Float, vertexSizeInBytes, attrib2.Offset);
-
-
-
-            //vao.LinkVBO(vbo, 1, 4, VertexAttribPointerType.Float, vertices.Length * Vertex.VertexInfo.SizeInBytes, 3 * sizeof(float));
-            //vao.LinkVBO(vbo, 2, 3, VertexAttribPointerType.Float, vertices.Length * Vertex.VertexInfo.SizeInBytes, 7 * sizeof(float));
 
 
             vao.UnbindVAO();

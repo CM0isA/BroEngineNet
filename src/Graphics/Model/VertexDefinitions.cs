@@ -50,7 +50,7 @@ namespace BroEngine.Graphics.Model
         public static readonly VertexInfo VertexInfo = new VertexInfo(
             typeof(Vertex),
             new VertexAttribute("Position", 0, 3, 0),
-            new VertexAttribute("Color", 1, 4, 2 * sizeof(float)),
+            new VertexAttribute("Color", 1, 4, 3 * sizeof(float)),
             new VertexAttribute("Normal", 2, 3, 7 * sizeof(float))
             );
 
@@ -60,8 +60,5 @@ namespace BroEngine.Graphics.Model
             Color = color;
             Normal = normal;
         }
-
-
-
     }
 }
